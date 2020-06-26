@@ -306,6 +306,8 @@ JitsiConference.prototype._init = function(options = {}) {
 
     const { config } = this.options;
 
+    logger.log("ZZZ conf init", {config})
+
     this._statsCurrentId = config.statisticsId ? config.statisticsId : Settings.callStatsUserName;
     this.room = this.xmpp.createRoom(
         this.options.name, {
@@ -1262,6 +1264,33 @@ JitsiConference.prototype.lock = function(password) {
  */
 JitsiConference.prototype.unlock = function() {
     return this.lock();
+};
+
+/**
+ * Set lock unmute for the room.
+ * @param {boolean} status
+ * @returns {Promise}
+ */
+JitsiConference.prototype.lockUnMute = function(status) {
+    if (!this.isModerator()) {
+        return Promise.reject(new Error('You are not moderator.'));
+    }
+
+    return new Promise((resolve, reject) => {
+        this.room.lockRoomUnMute(
+            status || false,
+            () => resolve(),
+            err => reject(err),
+            () => reject(JitsiConferenceErrors.LOCK_UNMUTE_NOT_SUPPORTED));
+    });
+};
+
+/**
+ * Remove lock unmute from the room.
+ * @returns {Promise}
+ */
+JitsiConference.prototype.unlockUnMute = function() {
+    return this.lockUnMute(false);
 };
 
 /**

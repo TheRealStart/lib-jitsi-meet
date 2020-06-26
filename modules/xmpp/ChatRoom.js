@@ -141,6 +141,8 @@ export default class ChatRoom extends Listenable {
 
         this.locked = false;
         this.transcriptionStatus = JitsiTranscriptionStatus.OFF;
+
+        logger.log("ZZZ chatRoom init", {options})
     }
 
     /* eslint-enable max-params */
@@ -1229,6 +1231,70 @@ export default class ChatRoom extends Listenable {
                 }
             },
             onError);
+    }
+
+
+    /**
+     *
+     * @param key
+     * @param onSuccess
+     * @param onError
+     * @param onNotSupported
+     */
+    lockRoomUnMute(key, onSuccess, onError, onNotSupported) {
+
+        console.log("ZZZ ChatRoom.lockRoomUnMute", {key})
+        const formsubmit
+            = $iq({
+            to: this.roomjid,
+            type: 'set'
+        })
+            .c('query', {
+                xmlns: 'http://jabber.org/protocol/muc#owner'
+            });
+
+        formsubmit.c('x', {
+            xmlns: 'jabber:x:data',
+            type: 'submit'
+        });
+        formsubmit
+            .c('field', { 'var': 'FORM_TYPE' })
+            .c('value')
+            .t('http://jabber.org/protocol/muc#roomconfig')
+            .up()
+            .up();
+
+        formsubmit
+            .c('field', { 'var': 'muc#roomconfig_moderatedroom' })
+            .c('value')
+            .t(key)
+            .up()
+            .up();
+
+        // Fixes a bug in prosody 0.9.+
+        // https://prosody.im/issues/issue/373
+        formsubmit
+            .c('field', { 'var': 'muc#roomconfig_whois' })
+            .c('value')
+            .t('anyone')
+            .up()
+            .up();
+
+        this.connection.sendIQ(formsubmit, onSuccess, onError);
+
+
+        // this.connection.sendIQ(
+        //     $iq({
+        //         to: this.roomjid,
+        //         type: 'get'
+        //     })
+        //         .c('query', { xmlns: 'http://jabber.org/protocol/muc#owner' }),
+        //     res => {
+        //
+        //         logger.log("ZZZ lockRoomUnMute", key, res);
+        //         onSuccess();
+        //     },
+        //     onError);
     }
 
     /* eslint-enable max-params */
