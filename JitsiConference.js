@@ -306,8 +306,6 @@ JitsiConference.prototype._init = function(options = {}) {
 
     const { config } = this.options;
 
-    logger.log("ZZZ conf init", {config})
-
     this._statsCurrentId = config.statisticsId ? config.statisticsId : Settings.callStatsUserName;
     this.room = this.xmpp.createRoom(
         this.options.name, {

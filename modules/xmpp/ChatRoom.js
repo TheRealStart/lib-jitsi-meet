@@ -140,9 +140,9 @@ export default class ChatRoom extends Listenable {
         this.participantPropertyListener = null;
 
         this.locked = false;
+        this.unmuteLocked = false;
         this.transcriptionStatus = JitsiTranscriptionStatus.OFF;
 
-        logger.log("ZZZ chatRoom init", {options})
     }
 
     /* eslint-enable max-params */
@@ -313,6 +313,16 @@ export default class ChatRoom extends Listenable {
             if (locked !== this.locked) {
                 this.eventEmitter.emit(XMPPEvents.MUC_LOCK_CHANGED, locked);
                 this.locked = locked;
+            }
+
+            const unmuteLocked
+                = $(result).find('>query>feature[var="muc_moderated"]')
+                    .length
+                === 1;
+
+            if (unmuteLocked !== this.unmuteLocked) {
+                this.eventEmitter.emit(XMPPEvents.MUC_UNMUTE_LOCK_CHANGED, unmuteLocked);
+                this.unmuteLocked = unmuteLocked;
             }
 
             const meetingIdValEl
@@ -1243,15 +1253,13 @@ export default class ChatRoom extends Listenable {
      */
     lockRoomUnMute(key, onSuccess, onError, onNotSupported) {
 
-        console.log("ZZZ ChatRoom.lockRoomUnMute", {key})
-        const formsubmit
-            = $iq({
+        const formsubmit = $iq({
             to: this.roomjid,
             type: 'set'
         })
-            .c('query', {
-                xmlns: 'http://jabber.org/protocol/muc#owner'
-            });
+        .c('query', {
+            xmlns: 'http://jabber.org/protocol/muc#owner'
+        });
 
         formsubmit.c('x', {
             xmlns: 'jabber:x:data',
@@ -1281,20 +1289,6 @@ export default class ChatRoom extends Listenable {
             .up();
 
         this.connection.sendIQ(formsubmit, onSuccess, onError);
-
-
-        // this.connection.sendIQ(
-        //     $iq({
-        //         to: this.roomjid,
-        //         type: 'get'
-        //     })
-        //         .c('query', { xmlns: 'http://jabber.org/protocol/muc#owner' }),
-        //     res => {
-        //
-        //         logger.log("ZZZ lockRoomUnMute", key, res);
-        //         onSuccess();
-        //     },
-        //     onError);
     }
 
     /* eslint-enable max-params */
@@ -1703,7 +1697,7 @@ export default class ChatRoom extends Listenable {
 
         this.eventEmitter.emit(XMPPEvents.AUDIO_MUTED_BY_FOCUS,
             mute.attr('actor'),
-            mute.text() === "true"
+            mute.text() === 'true'
         );
     }
 
