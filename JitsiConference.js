@@ -1265,6 +1265,33 @@ JitsiConference.prototype.unlock = function() {
 };
 
 /**
+ * Set lock unmute for the room.
+ * @param {boolean} status
+ * @returns {Promise}
+ */
+JitsiConference.prototype.lockUnMute = function(status) {
+    if (!this.isModerator()) {
+        return Promise.reject(new Error('You are not moderator.'));
+    }
+
+    return new Promise((resolve, reject) => {
+        this.room.lockRoomUnMute(
+            status || false,
+            () => resolve(),
+            err => reject(err),
+            () => reject(JitsiConferenceErrors.LOCK_UNMUTE_NOT_SUPPORTED));
+    });
+};
+
+/**
+ * Remove lock unmute from the room.
+ * @returns {Promise}
+ */
+JitsiConference.prototype.unlockUnMute = function() {
+    return this.lockUnMute(false);
+};
+
+/**
  * Elects the participant with the given id to be the selected participant in
  * order to receive higher video quality (if simulcast is enabled).
  * Or cache it if channel is not created and send it once channel is available.
