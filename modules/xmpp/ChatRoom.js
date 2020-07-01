@@ -140,7 +140,9 @@ export default class ChatRoom extends Listenable {
         this.participantPropertyListener = null;
 
         this.locked = false;
+        this.unmuteLocked = false;
         this.transcriptionStatus = JitsiTranscriptionStatus.OFF;
+
     }
 
     /* eslint-enable max-params */
@@ -311,6 +313,16 @@ export default class ChatRoom extends Listenable {
             if (locked !== this.locked) {
                 this.eventEmitter.emit(XMPPEvents.MUC_LOCK_CHANGED, locked);
                 this.locked = locked;
+            }
+
+            const unmuteLocked
+                = $(result).find('>query>feature[var="muc_moderated"]')
+                    .length
+                === 1;
+
+            if (unmuteLocked !== this.unmuteLocked) {
+                this.eventEmitter.emit(XMPPEvents.MUC_UNMUTE_LOCK_CHANGED, unmuteLocked);
+                this.unmuteLocked = unmuteLocked;
             }
 
             const meetingIdValEl
@@ -1275,6 +1287,54 @@ export default class ChatRoom extends Listenable {
             onError);
     }
 
+
+    /**
+     *
+     * @param key
+     * @param onSuccess
+     * @param onError
+     * @param onNotSupported
+     */
+    lockRoomUnMute(key, onSuccess, onError, onNotSupported) {
+
+        const formsubmit = $iq({
+            to: this.roomjid,
+            type: 'set'
+        })
+        .c('query', {
+            xmlns: 'http://jabber.org/protocol/muc#owner'
+        });
+
+        formsubmit.c('x', {
+            xmlns: 'jabber:x:data',
+            type: 'submit'
+        });
+        formsubmit
+            .c('field', { 'var': 'FORM_TYPE' })
+            .c('value')
+            .t('http://jabber.org/protocol/muc#roomconfig')
+            .up()
+            .up();
+
+        formsubmit
+            .c('field', { 'var': 'muc#roomconfig_moderatedroom' })
+            .c('value')
+            .t(key)
+            .up()
+            .up();
+
+        // Fixes a bug in prosody 0.9.+
+        // https://prosody.im/issues/issue/373
+        formsubmit
+            .c('field', { 'var': 'muc#roomconfig_whois' })
+            .c('value')
+            .t('anyone')
+            .up()
+            .up();
+
+        this.connection.sendIQ(formsubmit, onSuccess, onError);
+    }
+
     /* eslint-enable max-params */
 
     /**
@@ -1679,7 +1739,7 @@ export default class ChatRoom extends Listenable {
 
         this.eventEmitter.emit(XMPPEvents.AUDIO_MUTED_BY_FOCUS,
             mute.attr('actor'),
-            mute.text() === "true"
+            mute.text() === 'true'
         );
     }
 

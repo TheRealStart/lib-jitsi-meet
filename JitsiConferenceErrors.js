@@ -78,6 +78,11 @@ export const INCOMPATIBLE_SERVER_VERSIONS
 export const OFFER_ANSWER_FAILED = 'conference.offerAnswerFailed';
 
 /**
+ * Indicates that lock unmute cannot be set for this conference.
+ */
+export const LOCK_UNMUTE_NOT_SUPPORTED = 'conference.lockUnmuteNotSupported';
+
+/**
  * Indicates that password cannot be set for this conference.
  */
 export const PASSWORD_NOT_SUPPORTED = 'conference.passwordNotSupported';

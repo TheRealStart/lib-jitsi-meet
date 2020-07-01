@@ -153,6 +153,9 @@ const XMPPEvents = {
     // Designates an event indicating that the MUC has been locked or unlocked.
     MUC_LOCK_CHANGED: 'xmpp.muc_lock_changed',
 
+    // Designates an event indicating that the MUC unmute has been locked or unlocked.
+    MUC_UNMUTE_LOCK_CHANGED: 'xmpp.muc_unmute_lock_changed',
+
     // Designates an event indicating that the MUC members only config has changed.
     MUC_MEMBERS_ONLY_CHANGED: 'xmpp.muc_members_only_changed',
 
