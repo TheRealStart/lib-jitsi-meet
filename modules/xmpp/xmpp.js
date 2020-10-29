@@ -473,9 +473,7 @@ export default class XMPP extends Listenable {
      * @returns {Promise} Resolves with an instance of a strophe muc.
      */
     createRoom(roomName, options, onCreateResource) {
-        // There are cases (when using subdomain) where muc can hold an uppercase part
-        let roomjid = `${roomName}@${options.customDomain
-            ? options.customDomain : this.options.hosts.muc.toLowerCase()}/`;
+        let roomjid = `${roomName}@${this.options.hosts.muc}/`;
 
         const mucNickname = onCreateResource
             ? onCreateResource(this.connection.jid, this.authenticatedUser)
